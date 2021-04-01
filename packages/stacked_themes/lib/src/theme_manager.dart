@@ -16,8 +16,7 @@ const String DarkTheme = 'dark-theme';
 
 /// Provides functionality to manage the current theme for the application
 class ThemeManager {
-  final SharedPreferencesService? _sharedPreferences =
-      locator<SharedPreferencesService>();
+  final SharedPreferencesService? _sharedPreferences = locator<SharedPreferencesService>();
   final StatusBarService? _statusBarService = locator<StatusBarService>();
 
   /// Has to be called before  we make use of the theme manager
@@ -60,6 +59,15 @@ class ThemeManager {
   /// Returns true if the ThemeMode is dark. This does not apply when you're using system as ThemeMode
   bool get isDarkMode => _selectedThemeMode == ThemeMode.dark;
 
+  /// Get currently selected theme
+  int? get selectedTheme {
+    if (themes != null && themes!.length > 1) {
+      int? themeIndex = _sharedPreferences!.themeIndex;
+      return themeIndex == null ? 0 : themeIndex;
+    }
+    return null;
+  }
+
   ThemeManager({
     this.themes,
     this.statusBarColorBuilder,
@@ -69,8 +77,7 @@ class ThemeManager {
   }) {
     var hasMultipleThemes = themes != null && themes!.length > 1;
     var hasLightAndDarkThemes = darkTheme != null && lightTheme != null;
-    assert(hasMultipleThemes || hasLightAndDarkThemes,
-        '''You have to supply themes if you want to use themes. You have supplied no themes. Don\'t do that. Supply themes.
+    assert(hasMultipleThemes || hasLightAndDarkThemes, '''You have to supply themes if you want to use themes. You have supplied no themes. Don\'t do that. Supply themes.
 You can supply either a list of ThemeData objects to the themes property or a lightTheme and a darkTheme to be swapped between.
         ''');
 
@@ -83,8 +90,7 @@ You can supply either a list of ThemeData objects to the themes property or a li
         try {
           selectedTheme = themes![storedThemeIndex];
         } catch (e) {
-          print(
-              '''WARNING: You have changed your number of themes. Because of this we will clear your previously selected
+          print('''WARNING: You have changed your number of themes. Because of this we will clear your previously selected
         theme and broadcast the first theme in your list of themes.''');
           _sharedPreferences!.themeIndex = null;
           selectedTheme = themes!.first;
@@ -101,15 +107,11 @@ You can supply either a list of ThemeData objects to the themes property or a li
         _selectedThemeMode = savedUserThemeMode;
       }
 
-      selectedTheme =
-          _selectedThemeMode == ThemeMode.dark ? darkTheme : lightTheme;
+      selectedTheme = _selectedThemeMode == ThemeMode.dark ? darkTheme : lightTheme;
       _applyStatusBarColor(selectedTheme);
     }
 
-    ThemeModel _currTheme = ThemeModel(
-        selectedTheme: selectedTheme,
-        darkTheme: darkTheme,
-        themeMode: _selectedThemeMode);
+    ThemeModel _currTheme = ThemeModel(selectedTheme: selectedTheme, darkTheme: darkTheme, themeMode: _selectedThemeMode);
 
     _themesController = BehaviorSubject<ThemeModel>.seeded(_currTheme);
     _initialTheme = _currTheme;
@@ -118,12 +120,8 @@ You can supply either a list of ThemeData objects to the themes property or a li
   }
 
   ThemeModel getSelectedTheme() {
-    var selectedTheme =
-        _selectedThemeMode == ThemeMode.dark ? darkTheme : lightTheme;
-    return ThemeModel(
-        selectedTheme: selectedTheme,
-        darkTheme: darkTheme,
-        themeMode: _selectedThemeMode);
+    var selectedTheme = _selectedThemeMode == ThemeMode.dark ? darkTheme : lightTheme;
+    return ThemeModel(selectedTheme: selectedTheme, darkTheme: darkTheme, themeMode: _selectedThemeMode);
   }
 
   /// Sets the theme for the application equal to the theme at the index
@@ -150,11 +148,9 @@ You can supply either a list of ThemeData objects to the themes property or a li
 
   /// Swaps between the light and dark ThemeMode
   void toggleDarkLightTheme() {
-    _selectedThemeMode =
-        _selectedThemeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+    _selectedThemeMode = _selectedThemeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
 
-    _applyStatusBarColor(
-        _selectedThemeMode == ThemeMode.dark ? darkTheme : lightTheme);
+    _applyStatusBarColor(_selectedThemeMode == ThemeMode.dark ? darkTheme : lightTheme);
     _themesController.add(ThemeModel(
       selectedTheme: lightTheme,
       darkTheme: darkTheme,
@@ -168,13 +164,10 @@ You can supply either a list of ThemeData objects to the themes property or a li
     _sharedPreferences!.userThemeMode = themeMode;
 
     if (themeMode != ThemeMode.system) {
-      _applyStatusBarColor(
-          _selectedThemeMode == ThemeMode.dark ? darkTheme : lightTheme);
+      _applyStatusBarColor(_selectedThemeMode == ThemeMode.dark ? darkTheme : lightTheme);
     } else {
-      var currentBrightness =
-          SchedulerBinding.instance!.window.platformBrightness;
-      _applyStatusBarColor(
-          currentBrightness == Brightness.dark ? darkTheme : lightTheme);
+      var currentBrightness = SchedulerBinding.instance!.window.platformBrightness;
+      _applyStatusBarColor(currentBrightness == Brightness.dark ? darkTheme : lightTheme);
     }
 
     _themesController.add(ThemeModel(
@@ -186,8 +179,7 @@ You can supply either a list of ThemeData objects to the themes property or a li
 }
 
 /// Returns the [ThemeManger] that
-ThemeManager getThemeManager(BuildContext context) =>
-    Provider.of<ThemeManager>(context, listen: false);
+ThemeManager getThemeManager(BuildContext context) => Provider.of<ThemeManager>(context, listen: false);
 
 class ThemeModel {
   final ThemeData? selectedTheme;
